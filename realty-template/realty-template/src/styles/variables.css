@@ -1,0 +1,26 @@
+/* Design tokens. Colors are overridden at runtime from clientData.branding. */
+:root {
+  --color-primary: #183b32;
+  --color-accent: #c5a36a;
+  --color-bg: #f7f5f0;
+  --color-text: #252525;
+  --color-muted: #5f5f5a;
+  --color-surface: #ffffff;
+  --color-border: #e2ded3;
+  --color-whatsapp: #1f7a4d;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius: 4px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 6px 20px rgba(0, 0, 0, 0.06);
+  --space-section: clamp(3rem, 7vw, 6rem);
+  --container: 1180px;
+  --nav-height: 68px;
+}
+/* 
+:root{
+  --color-primary: #1b2a5c;
+  --color-accent: #e0a032;
+  --color-bg: #f6f7fb;
+  
+} */
+
+
