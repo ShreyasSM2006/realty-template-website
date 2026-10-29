@@ -34,6 +34,12 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [isRecovery, setIsRecovery] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [formOpen, setFormOpen] = useState(false);
@@ -71,16 +77,22 @@ export default function AdminDashboard() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      if (!active) return;
+    } = supabase.auth.onAuthStateChange((event, nextSession) => {
+        if (!active) return;
 
-      setSession(nextSession);
+        if (event === "PASSWORD_RECOVERY") {
+          setIsRecovery(true);
+          setError("");
+          setNotice("");
+        }
 
-      if (!nextSession) {
-        setAuthorized(false);
-        setProperties([]);
-        setChecking(false);
-      }
+        setSession(nextSession);
+
+        if (!nextSession) {
+          setAuthorized(false);
+          setProperties([]);
+          setChecking(false);
+        }
     });
 
     return () => {
@@ -136,6 +148,27 @@ export default function AdminDashboard() {
     await verifyAdmin(data.user);
     setLoading(false);
   }
+  async function sendPasswordReset(event) {
+    event.preventDefault();
+    setResetLoading(true);
+    setError("");
+    setNotice("");
+
+    const { error: resetError } =
+      await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/admin?reset-password=true`,
+      });
+
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setNotice(
+        "If an account exists for this email, you will receive a password reset link."
+      );
+    }
+
+    setResetLoading(false);
+  }
 
   async function logout() {
     const { error: logoutError } = await supabase.auth.signOut();
@@ -151,6 +184,44 @@ export default function AdminDashboard() {
     setError("");
     setNotice("");
   }
+  
+async function updatePassword(event) {
+  event.preventDefault();
+  setError("");
+  setNotice("");
+
+  if (newPassword.length < 6) {
+    setError("Password must be at least 6 characters long.");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
+
+  setLoading(true);
+
+  const { error: updateError } = await supabase.auth.updateUser({
+    password: newPassword,
+  });
+
+  if (updateError) {
+    setError(updateError.message);
+  } else {
+    setNotice("Password updated successfully. You can now sign in with your new password.");
+
+    setIsRecovery(false);
+    setNewPassword("");
+    setConfirmPassword("");
+
+    await supabase.auth.signOut();
+    setSession(null);
+    setAuthorized(false);
+  }
+
+  setLoading(false);
+}
 
   async function loadProperties() {
     setLoading(true);
@@ -464,43 +535,157 @@ export default function AdminDashboard() {
     );
   }
 
+  
+if (isRecovery) {
+  return (
+    <main className="admin-login-page">
+      <form className="admin-login-card" onSubmit={updatePassword}>
+        <p className="admin-eyebrow">PROPERTY MANAGEMENT</p>
+        <h1>Set new password</h1>
+        <p>Choose a new password for your administrator account.</p>
+
+        {error && (
+          <div className="admin-alert error">{error}</div>
+        )}
+
+        {notice && (
+          <div className="admin-alert success">{notice}</div>
+        )}
+
+        <label htmlFor="new-password">New password</label>
+        <input
+          id="new-password"
+          type="password"
+          autoComplete="new-password"
+          value={newPassword}
+          onChange={(event) => setNewPassword(event.target.value)}
+          minLength={6}
+          required
+        />
+
+        <label htmlFor="confirm-password">Confirm new password</label>
+        <input
+          id="confirm-password"
+          type="password"
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          minLength={6}
+          required
+        />
+
+        <button className="admin-primary" disabled={loading}>
+          {loading ? "Updating password…" : "Update password"}
+        </button>
+      </form>
+    </main>
+  );
+}
+
   if (!session || !authorized) {
     return (
       <main className="admin-login-page">
-        <form className="admin-login-card" onSubmit={login}>
+        <form
+          className="admin-login-card"
+          onSubmit={forgotPassword ? sendPasswordReset : login}
+        >
           <p className="admin-eyebrow">PROPERTY MANAGEMENT</p>
-          <h1>Admin login</h1>
-          <p>Sign in with your authorized administrator account.</p>
+
+          <h1>{forgotPassword ? "Reset password" : "Admin login"}</h1>
+
+          <p>
+            {forgotPassword
+              ? "Enter your admin email and we'll send you a password reset link."
+              : "Sign in with your authorized administrator account."}
+          </p>
 
           {error && (
             <div className="admin-alert error">{error}</div>
           )}
 
-          <label htmlFor="admin-email">Email</label>
-          <input
-            id="admin-email"
-            name="email"
-            type="email"
-            autoComplete="username"
-            required
-          />
+          {notice && (
+            <div className="admin-alert">
+              {notice}
+            </div>
+          )}
 
-          <label htmlFor="admin-password">Password</label>
-          <input
-            id="admin-password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-          />
+          {forgotPassword ? (
+            <>
+              <label htmlFor="reset-email">Admin email</label>
+              <input
+                id="reset-email"
+                name="resetEmail"
+                type="email"
+                autoComplete="email"
+                value={resetEmail}
+                onChange={(event) => setResetEmail(event.target.value)}
+                placeholder="Enter your admin email"
+                required
+              />
 
-          <button className="admin-primary" disabled={loading}>
-            {loading ? "Signing in…" : "Sign in"}
-          </button>
+              <button
+                className="admin-primary"
+                type="submit"
+                disabled={resetLoading}
+              >
+                {resetLoading ? "Sending link…" : "Send reset link"}
+              </button>
+
+              <button
+                type="button"
+                className="admin-forgot-link"
+                onClick={() => {
+                  setForgotPassword(false);
+                  setError("");
+                  setNotice("");
+                }}
+              >
+                Back to login
+              </button>
+            </>
+          ) : (
+            <>
+              <label htmlFor="admin-email">Email</label>
+              <input
+                id="admin-email"
+                name="email"
+                type="email"
+                autoComplete="username"
+                required
+              />
+
+              <label htmlFor="admin-password">Password</label>
+              <input
+                id="admin-password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+              />
+
+              <button
+                type="button"
+                className="admin-forgot-link"
+                onClick={() => {
+                  setForgotPassword(true);
+                  setResetEmail("");
+                  setError("");
+                  setNotice("");
+                }}
+              >
+                Forgot password?
+              </button>
+
+              <button className="admin-primary" disabled={loading}>
+                {loading ? "Signing in…" : "Sign in"}
+              </button>
+            </>
+          )}
         </form>
       </main>
     );
   }
+
 
   return (
     <main className="admin-shell">

@@ -480,3 +480,31 @@
 .admin-table th { background: #f7f7f3; color: #687066; letter-spacing: .04em; }
 .admin-status.published { background: #e3eee7; color: #28543d; }
 .featured-toggle { border-radius: 3px; }
+
+
+/* Forgot Password Link */
+.admin-forgot-link {
+  display: block;
+  width: fit-content;
+  margin: 10px 0 18px auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.admin-forgot-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.admin-forgot-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
