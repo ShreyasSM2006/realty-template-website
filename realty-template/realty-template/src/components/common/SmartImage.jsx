@@ -7,7 +7,7 @@ const FALLBACK =
   )
 
 /** Image with lazy loading and a built-in fallback for missing/broken URLs. */
-export default function SmartImage({ src, alt, className, eager = false, ...rest }) {
+export default function SmartImage({ src, alt, className, eager = false, fetchPriority, ...rest }) {
   const [failed, setFailed] = useState(false)
   return (
     <img
@@ -16,6 +16,7 @@ export default function SmartImage({ src, alt, className, eager = false, ...rest
       alt={alt}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
+      fetchpriority={fetchPriority}
       onError={() => setFailed(true)}
       {...rest}
     />

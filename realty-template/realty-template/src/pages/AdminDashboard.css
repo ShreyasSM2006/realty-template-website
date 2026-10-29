@@ -451,3 +451,32 @@
   font-size: 12px;
   font-weight: 400;
 }
+
+/* Luxury workspace skin */
+.admin-shell,
+.admin-login-page { background: #f1f2ed; }
+.admin-shell { max-width: 1480px; color: var(--color-text, #242823); }
+.admin-header h1,
+.admin-login-card h1 { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
+.admin-eyebrow { color: #8d7445 !important; }
+.admin-stats > div,
+.admin-table-card,
+.admin-form-card,
+.admin-login-card { border-color: #dcddd4; border-radius: 4px; box-shadow: 0 8px 30px rgba(11, 24, 20, .04); }
+.admin-primary { background: #142A24; border-radius: 3px; }
+.admin-secondary { border-radius: 3px; }
+.admin-toolbar input,
+.admin-toolbar select,
+.property-form input:not([type="file"]),
+.property-form textarea,
+.property-form select,
+.admin-login-card input { border-color: #d7d8cf; border-radius: 3px; }
+.admin-toolbar input:focus,
+.admin-toolbar select:focus,
+.property-form input:focus,
+.property-form textarea:focus,
+.property-form select:focus,
+.admin-login-card input:focus { border-color: #C6A66B; outline: 3px solid rgba(198, 166, 107, .16); }
+.admin-table th { background: #f7f7f3; color: #687066; letter-spacing: .04em; }
+.admin-status.published { background: #e3eee7; color: #28543d; }
+.featured-toggle { border-radius: 3px; }
