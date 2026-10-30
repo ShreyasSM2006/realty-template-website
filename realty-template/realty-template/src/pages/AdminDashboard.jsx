@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import "./AdminDashboard.css";
@@ -53,8 +52,7 @@ export default function AdminDashboard() {
     let active = true;
 
     async function initialize() {
-      const { data, error: sessionError } =
-        await supabase.auth.getSession();
+      const { data, error: sessionError } = await supabase.auth.getSession();
 
       if (!active) return;
 
@@ -78,21 +76,21 @@ export default function AdminDashboard() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, nextSession) => {
-        if (!active) return;
+      if (!active) return;
 
-        if (event === "PASSWORD_RECOVERY") {
-          setIsRecovery(true);
-          setError("");
-          setNotice("");
-        }
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+        setError("");
+        setNotice("");
+      }
 
-        setSession(nextSession);
+      setSession(nextSession);
 
-        if (!nextSession) {
-          setAuthorized(false);
-          setProperties([]);
-          setChecking(false);
-        }
+      if (!nextSession) {
+        setAuthorized(false);
+        setProperties([]);
+        setChecking(false);
+      }
     });
 
     return () => {
@@ -116,7 +114,7 @@ export default function AdminDashboard() {
       setError(
         adminError
           ? `Could not verify admin access: ${adminError.message}`
-          : "This account is not authorized to manage properties."
+          : "This account is not authorized to manage properties.",
       );
       setChecking(false);
       return;
@@ -135,8 +133,10 @@ export default function AdminDashboard() {
     const email = event.currentTarget.email.value;
     const password = event.currentTarget.password.value;
 
-    const { data, error: loginError } =
-      await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: loginError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (loginError) {
       setError(loginError.message);
@@ -154,16 +154,18 @@ export default function AdminDashboard() {
     setError("");
     setNotice("");
 
-    const { error: resetError } =
-      await supabase.auth.resetPasswordForEmail(resetEmail, {
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(
+      resetEmail,
+      {
         redirectTo: `${window.location.origin}/admin?reset-password=true`,
-      });
+      },
+    );
 
     if (resetError) {
       setError(resetError.message);
     } else {
       setNotice(
-        "If an account exists for this email, you will receive a password reset link."
+        "If an account exists for this email, you will receive a password reset link.",
       );
     }
 
@@ -184,44 +186,46 @@ export default function AdminDashboard() {
     setError("");
     setNotice("");
   }
-  
-async function updatePassword(event) {
-  event.preventDefault();
-  setError("");
-  setNotice("");
 
-  if (newPassword.length < 6) {
-    setError("Password must be at least 6 characters long.");
-    return;
+  async function updatePassword(event) {
+    event.preventDefault();
+    setError("");
+    setNotice("");
+
+    if (newPassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      setError(updateError.message);
+    } else {
+      setNotice(
+        "Password updated successfully. You can now sign in with your new password.",
+      );
+
+      setIsRecovery(false);
+      setNewPassword("");
+      setConfirmPassword("");
+
+      await supabase.auth.signOut();
+      setSession(null);
+      setAuthorized(false);
+    }
+
+    setLoading(false);
   }
-
-  if (newPassword !== confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
-
-  setLoading(true);
-
-  const { error: updateError } = await supabase.auth.updateUser({
-    password: newPassword,
-  });
-
-  if (updateError) {
-    setError(updateError.message);
-  } else {
-    setNotice("Password updated successfully. You can now sign in with your new password.");
-
-    setIsRecovery(false);
-    setNewPassword("");
-    setConfirmPassword("");
-
-    await supabase.auth.signOut();
-    setSession(null);
-    setAuthorized(false);
-  }
-
-  setLoading(false);
-}
 
   async function loadProperties() {
     setLoading(true);
@@ -287,8 +291,7 @@ async function updatePassword(event) {
     const uploadedUrls = [];
 
     for (const photo of photos) {
-      const extension =
-        photo.name.split(".").pop()?.toLowerCase() || "jpg";
+      const extension = photo.name.split(".").pop()?.toLowerCase() || "jpg";
 
       const path = `${propertyId}/${crypto.randomUUID()}.${extension}`;
 
@@ -317,14 +320,9 @@ async function updatePassword(event) {
     if (!session?.user || !authorized) return;
 
     const price = Number(form.price);
-    const area =
-      form.area_sqft === "" ? null : Number(form.area_sqft);
+    const area = form.area_sqft === "" ? null : Number(form.area_sqft);
 
-    if (
-      !form.title.trim() ||
-      !form.city.trim() ||
-      !form.locality.trim()
-    ) {
+    if (!form.title.trim() || !form.city.trim() || !form.locality.trim()) {
       setError("Title, city, and locality are required.");
       return;
     }
@@ -334,10 +332,7 @@ async function updatePassword(event) {
       return;
     }
 
-    if (
-      area !== null &&
-      (!Number.isFinite(area) || area < 0)
-    ) {
+    if (area !== null && (!Number.isFinite(area) || area < 0)) {
       setError("Enter a valid property area.");
       return;
     }
@@ -408,13 +403,13 @@ async function updatePassword(event) {
       } else if (editingId) {
         // Save photo removals made in the edit form.
         const originalProperty = properties.find(
-          (property) => property.id === editingId
+          (property) => property.id === editingId,
         );
 
         const originalUrls = originalProperty?.image_urls ?? [];
 
         const removedUrls = originalUrls.filter(
-          (url) => !currentUrls.includes(url)
+          (url) => !currentUrls.includes(url),
         );
 
         if (removedUrls.length > 0) {
@@ -426,9 +421,7 @@ async function updatePassword(event) {
 
               return index === -1
                 ? null
-                : decodeURIComponent(
-                    url.slice(index + marker.length)
-                  );
+                : decodeURIComponent(url.slice(index + marker.length));
             })
             .filter(Boolean);
 
@@ -463,7 +456,7 @@ async function updatePassword(event) {
 
   async function deleteProperty(property) {
     const confirmed = window.confirm(
-      `Permanently delete "${property.title}"? This cannot be undone.`
+      `Permanently delete "${property.title}"? This cannot be undone.`,
     );
 
     if (!confirmed) return;
@@ -518,7 +511,9 @@ async function updatePassword(event) {
         property.locality,
         property.property_type,
       ].some((value) =>
-        String(value ?? "").toLowerCase().includes(term)
+        String(value ?? "")
+          .toLowerCase()
+          .includes(term),
       );
 
     return (
@@ -535,52 +530,47 @@ async function updatePassword(event) {
     );
   }
 
-  
-if (isRecovery) {
-  return (
-    <main className="admin-login-page">
-      <form className="admin-login-card" onSubmit={updatePassword}>
-        <p className="admin-eyebrow">PROPERTY MANAGEMENT</p>
-        <h1>Set new password</h1>
-        <p>Choose a new password for your administrator account.</p>
+  if (isRecovery) {
+    return (
+      <main className="admin-login-page">
+        <form className="admin-login-card" onSubmit={updatePassword}>
+          <p className="admin-eyebrow">PROPERTY MANAGEMENT</p>
+          <h1>Set new password</h1>
+          <p>Choose a new password for your administrator account.</p>
 
-        {error && (
-          <div className="admin-alert error">{error}</div>
-        )}
+          {error && <div className="admin-alert error">{error}</div>}
 
-        {notice && (
-          <div className="admin-alert success">{notice}</div>
-        )}
+          {notice && <div className="admin-alert success">{notice}</div>}
 
-        <label htmlFor="new-password">New password</label>
-        <input
-          id="new-password"
-          type="password"
-          autoComplete="new-password"
-          value={newPassword}
-          onChange={(event) => setNewPassword(event.target.value)}
-          minLength={6}
-          required
-        />
+          <label htmlFor="new-password">New password</label>
+          <input
+            id="new-password"
+            type="password"
+            autoComplete="new-password"
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+            minLength={6}
+            required
+          />
 
-        <label htmlFor="confirm-password">Confirm new password</label>
-        <input
-          id="confirm-password"
-          type="password"
-          autoComplete="new-password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-          minLength={6}
-          required
-        />
+          <label htmlFor="confirm-password">Confirm new password</label>
+          <input
+            id="confirm-password"
+            type="password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+            minLength={6}
+            required
+          />
 
-        <button className="admin-primary" disabled={loading}>
-          {loading ? "Updating password…" : "Update password"}
-        </button>
-      </form>
-    </main>
-  );
-}
+          <button className="admin-primary" disabled={loading}>
+            {loading ? "Updating password…" : "Update password"}
+          </button>
+        </form>
+      </main>
+    );
+  }
 
   if (!session || !authorized) {
     return (
@@ -599,15 +589,9 @@ if (isRecovery) {
               : "Sign in with your authorized administrator account."}
           </p>
 
-          {error && (
-            <div className="admin-alert error">{error}</div>
-          )}
+          {error && <div className="admin-alert error">{error}</div>}
 
-          {notice && (
-            <div className="admin-alert">
-              {notice}
-            </div>
-          )}
+          {notice && <div className="admin-alert">{notice}</div>}
 
           {forgotPassword ? (
             <>
@@ -685,7 +669,6 @@ if (isRecovery) {
       </main>
     );
   }
-
 
   return (
     <main className="admin-shell">
@@ -787,12 +770,12 @@ if (isRecovery) {
             </label>
             <label>
               Address *
-              <input 
-              type="text" 
-              name="address"
-              value={form.address ?? ""}
-              onChange={updateField}
-              required
+              <input
+                type="text"
+                name="address"
+                value={form.address ?? ""}
+                onChange={updateField}
+                required
               />
             </label>
             <label>
@@ -801,31 +784,29 @@ if (isRecovery) {
                 name="amenities"
                 type="text"
                 value={amenitiesInput}
-                onChange={(event) =>
-                  setAmenitiesInput(event.target.value)
-                }
+                onChange={(event) => setAmenitiesInput(event.target.value)}
                 placeholder="Parking, Swimming Pool, Gym, Lift, 24/7 Security"
               />
               <small>Separate amenities with commas.</small>
             </label>
-          <label className="featured-toggle">
-            <input
-              type="checkbox"
-              name="featured"
-              checked={form.featured ?? false}
-              onChange={(e) =>
-                setForm((prev) => ({
-                  ...prev,
-                  featured: e.target.checked,
-                }))
-              }
-            />
+            <label className="featured-toggle">
+              <input
+                type="checkbox"
+                name="featured"
+                checked={form.featured ?? false}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    featured: e.target.checked,
+                  }))
+                }
+              />
 
-            <span>
-              Feature Property
-              <small>Highlight this property on the homepage</small>
-            </span>
-          </label>
+              <span>
+                Feature Property
+                <small>Highlight this property on the homepage</small>
+              </span>
+            </label>
             <div className="property-form-grid">
               <label>
                 Price (₹) *
@@ -962,7 +943,7 @@ if (isRecovery) {
                           setForm((current) => ({
                             ...current,
                             image_urls: current.image_urls.filter(
-                              (image) => image !== url
+                              (image) => image !== url,
                             ),
                           }))
                         }
@@ -987,9 +968,7 @@ if (isRecovery) {
               />
             </label>
 
-            {photos.length > 0 && (
-              <p>{photos.length} new photo(s) selected</p>
-            )}
+            {photos.length > 0 && <p>{photos.length} new photo(s) selected</p>}
 
             <button className="admin-primary" disabled={saving}>
               {saving
@@ -1027,7 +1006,6 @@ if (isRecovery) {
                 <th>Actions</th>
               </tr>
             </thead>
-
             <tbody>
               {visibleProperties.map((property) => (
                 <tr key={property.id}>
@@ -1050,18 +1028,12 @@ if (isRecovery) {
                     {property.locality}, {property.city}
                   </td>
 
-                  <td>
-                    {formatPrice(property.price, property.listing_type)}
-                  </td>
+                  <td>{formatPrice(property.price, property.listing_type)}</td>
+
+                  <td>{property.listing_type === "buy" ? "Sale" : "Rent"}</td>
 
                   <td>
-                    {property.listing_type === "buy" ? "Sale" : "Rent"}
-                  </td>
-
-                  <td>
-                    <span
-                      className={`admin-status ${property.status}`}
-                    >
+                    <span className={`admin-status ${property.status}`}>
                       {property.status}
                     </span>
                   </td>
