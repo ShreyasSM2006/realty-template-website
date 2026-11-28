@@ -4,6 +4,7 @@ import SmartImage from '../common/SmartImage.jsx';
 import WhatsAppButton from '../common/WhatsAppButton.jsx';
 import { formatPrice } from '../../utils/formatPrice.js';
 import { propertyEnquiryMessage } from '../../utils/whatsapp.js';
+import {motion} from "motion/react"
 
 export const STATUS_LABELS = {
   available: 'Available',
@@ -22,6 +23,14 @@ export default function PropertyCard({ property: p }) {
   const unavailable = p.status && p.status !== 'available';
 
   return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+      className="property-card"
+    >      
     <article className="property-card">
       <Link
         to={`/properties/${p.id}`}
@@ -81,5 +90,6 @@ export default function PropertyCard({ property: p }) {
         </div>
       </div>
     </article>
+    </motion.div>
   );
 }
