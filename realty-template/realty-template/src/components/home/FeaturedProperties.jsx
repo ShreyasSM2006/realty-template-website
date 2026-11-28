@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase.js'
+import { clientData } from '../../data/clientData.js'
+import { mapSupabaseProperty } from '../../utils/propertyMapper.js'
+import { ScrollTrigger } from '../../utils/gsapConfig.js'
 import SectionHeading from '../common/SectionHeading.jsx'
 import PropertyGrid from '../properties/PropertyGrid.jsx'
-import Button from '../common/Button.jsx'
 
 export default function FeaturedProperties() {
   const [featured, setFeatured] = useState([])
@@ -24,23 +28,10 @@ export default function FeaturedProperties() {
         if (error) throw error
 
         if (active) {
-          const mappedProperties = (data ?? []).map((item) => ({
-            ...item,
-            listingPurpose: item.listing_type,
-            propertyType: item.property_type,
-            areaSqFt: item.area_sqft,
-            images: item.image_urls ?? [],
-            amenities: item.amenities ?? [],
-            address: item.address || [item.locality, item.city]
-              .filter(Boolean)
-              .join(', '),
-            status: 'available',
-          }))
-
-          setFeatured(mappedProperties)
+          setFeatured((data ?? []).map(mapSupabaseProperty))
         }
-      } catch (error) {
-        console.error('Error fetching featured properties:', error)
+      } catch (err) {
+        console.error('Error fetching featured properties:', err)
         if (active) setFeatured([])
       } finally {
         if (active) setLoading(false)
@@ -54,25 +45,62 @@ export default function FeaturedProperties() {
     }
   }, [])
 
-  if (loading || featured.length === 0) return null
+  useEffect(() => {
+    if (!loading) {
+      requestAnimationFrame(() => ScrollTrigger.refresh())
+    }
+  }, [loading, featured.length])
+
+  if (!clientData.features.featuredProperties) return null
+  if (loading) {
+    return (
+      <section className="section" aria-busy="true">
+        <div className="container">
+          <div className="section-split-head">
+            <SectionHeading
+              eyebrow="Portfolio"
+              title="Selected residences"
+              intro="A curated edit of available homes and investments."
+            />
+          </div>
+          <div className="property-grid">
+            {[0, 1, 2].map((n) => (
+              <div key={n} className="skeleton-card" aria-hidden="true">
+                <div className="skeleton-media" />
+                <div className="skeleton-body">
+                  <div className="skeleton-line short" />
+                  <div className="skeleton-line tall" />
+                  <div className="skeleton-line medium" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (featured.length === 0) return null
 
   return (
-    <section className="section">
+    <section className="section" id="featured">
       <div className="container">
-        <SectionHeading
-          eyebrow="Featured"
-          title="Selected properties"
-          as="h2"
-          intro="Explore our handpicked properties."
-        />
+        <div className="section-split-head">
+          <SectionHeading
+            eyebrow="Portfolio"
+            title="Selected residences"
+            as="h2"
+            intro="Explore our handpicked properties."
+          />
+
+          {clientData.features.propertyListings && (
+            <Link to="/properties" className="editorial-link">
+              View all listings <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          )}
+        </div>
 
         <PropertyGrid properties={featured} />
-
-        <div className="center">
-          <Button to="/properties" variant="outline">
-            Browse all listings
-          </Button>
-        </div>
       </div>
     </section>
   )

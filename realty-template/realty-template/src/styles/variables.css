@@ -1,34 +1,37 @@
-/* Design tokens. Branding colors are applied at runtime from clientData.branding. */
+/* Architectural Editorial Design System Tokens.
+ * Primary branding colors and fonts can be overridden at runtime via clientData.branding. */
 :root {
-  --color-primary: #142A24;
-  --color-primary-soft: #1d3931;
-  --color-evergreen: #0B1814;
-  --color-accent: #C6A66B;
-  --color-bg: #F7F5EF;
-  --color-stone: #E9E5DB;
-  --color-text: #242823;
-  --color-muted: #686b64;
-  --color-surface: #FFFFFF;
-  --color-border: #DDDCD3;
-  --color-whatsapp: #1f7a4d;
-  --font-sans: 'Segoe UI', Arial, sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
-  --radius: 3px;
-  --radius-lg: 6px;
-  --shadow-sm: 0 1px 2px rgba(11, 24, 20, 0.04);
-  --shadow: 0 18px 50px rgba(11, 24, 20, 0.09);
-  --shadow-soft: 0 8px 30px rgba(11, 24, 20, 0.07);
-  --transition: 220ms cubic-bezier(.2,.65,.3,1);
-  --space-section: clamp(4rem, 7vw, 7rem);
-  --container: 1240px;
-  --nav-height: 76px;
+  --color-primary: #1C1B19;
+  --color-primary-soft: #2A2825;
+  --color-evergreen: #141311;
+  --color-accent: #9E7B4F;
+  --color-accent-light: #C5A87E;
+  --color-accent-tint: rgba(158, 123, 79, 0.12);
+  --color-bg: #F6F3EC;
+  --color-stone: #ECE7DC;
+  --color-text: #242320;
+  --color-muted: #6E6A63;
+  --color-surface: #FCFBF8;
+  --color-border: #DCD6CA;
+  --color-border-strong: #C5BDB0;
+  --color-whatsapp: #1E6B47;
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+
+  --radius: 2px;
+  --radius-lg: 4px;
+
+  --shadow-sm: 0 1px 2px rgba(20, 19, 17, 0.04);
+  --shadow-soft: 0 14px 40px rgba(20, 19, 17, 0.06);
+  --shadow: 0 24px 64px rgba(20, 19, 17, 0.10);
+
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition: 320ms var(--ease-editorial);
+  --transition-slow: 650ms var(--ease-editorial);
+
+  --space-section: clamp(4.75rem, 8.5vw, 8.5rem);
+  --container: 1320px;
+  --container-narrow: 1080px;
+  --nav-height: 82px;
 }
-/* 
-:root{
-  --color-primary: #1b2a5c;
-  --color-accent: #e0a032;
-  --color-bg: #f6f7fb;
-  
-} */
-
-

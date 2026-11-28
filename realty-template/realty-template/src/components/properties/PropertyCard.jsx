@@ -1,37 +1,40 @@
-import { Link } from 'react-router-dom';
-import { Bed, Bath, Ruler, MapPin } from 'lucide-react';
-import SmartImage from '../common/SmartImage.jsx';
-import WhatsAppButton from '../common/WhatsAppButton.jsx';
-import { formatPrice } from '../../utils/formatPrice.js';
-import { propertyEnquiryMessage } from '../../utils/whatsapp.js';
-import {motion} from "motion/react"
+import { Link } from 'react-router-dom'
+import { Bed, Bath, Ruler, MapPin, Images } from 'lucide-react'
+import { motion } from 'motion/react'
+import SmartImage from '../common/SmartImage.jsx'
+import WhatsAppButton from '../common/WhatsAppButton.jsx'
+import { formatPrice } from '../../utils/formatPrice.js'
+import { propertyEnquiryMessage } from '../../utils/whatsapp.js'
 
 export const STATUS_LABELS = {
   available: 'Available',
   sold: 'Sold',
   rented: 'Rented',
   'under-offer': 'Under offer',
-};
+}
 
-export default function PropertyCard({ property: p }) {
+export default function PropertyCard({ property: p, index = 0 }) {
   const specs = [
     p.bedrooms != null && { Icon: Bed, text: `${p.bedrooms} Bed` },
     p.bathrooms != null && { Icon: Bath, text: `${p.bathrooms} Bath` },
     p.areaSqFt != null && { Icon: Ruler, text: `${p.areaSqFt} sq ft` },
-  ].filter(Boolean);
+  ].filter(Boolean)
 
-  const unavailable = p.status && p.status !== 'available';
+  const unavailable = p.status && p.status !== 'available'
+  const photoCount = p.images?.length || 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5 }}
+    <motion.article
       className="property-card"
-    >      
-    <article className="property-card">
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      transition={{
+        duration: 0.6,
+        delay: Math.min(index * 0.08, 0.32),
+        ease: [0.22, 1, 0.36, 1],
+      }}
+    >
       <Link
         to={`/properties/${p.id}`}
         className="property-media"
@@ -44,15 +47,23 @@ export default function PropertyCard({ property: p }) {
           height="480"
         />
         <span className="badge badge-purpose">
-          {p.listingPurpose === 'rent' ? 'For rent' : 'For sale'}
+          {p.listingPurpose === 'rent' ? 'For Rent' : 'For Sale'}
         </span>
         {p.featured && <span className="badge badge-featured">Featured</span>}
+        {photoCount > 1 && (
+          <span className="badge-count tabular" aria-label={`${photoCount} photos`}>
+            <Images size={12} aria-hidden="true" /> {photoCount}
+          </span>
+        )}
       </Link>
 
       <div className="property-body">
         {/* Property cards intentionally show locality, not the full street address. */}
         <p className="property-meta">
-          <MapPin size={14} aria-hidden="true" /> {p.locality} · {p.propertyType}
+          <MapPin size={13} aria-hidden="true" />
+          <span>
+            {p.locality} · {p.propertyType}
+          </span>
         </p>
 
         <h3>
@@ -66,8 +77,8 @@ export default function PropertyCard({ property: p }) {
         {specs.length > 0 && (
           <ul className="specs">
             {specs.map(({ Icon, text }) => (
-              <li key={text}>
-                <Icon size={16} aria-hidden="true" /> {text}
+              <li key={text} className="tabular">
+                <Icon size={15} strokeWidth={1.6} aria-hidden="true" /> {text}
               </li>
             ))}
           </ul>
@@ -79,7 +90,7 @@ export default function PropertyCard({ property: p }) {
 
         <div className="card-actions">
           <Link to={`/properties/${p.id}`} className="btn btn-outline">
-            View Details
+            View Residence
           </Link>
           <WhatsAppButton
             message={propertyEnquiryMessage(p)}
@@ -89,7 +100,6 @@ export default function PropertyCard({ property: p }) {
           </WhatsAppButton>
         </div>
       </div>
-    </article>
-    </motion.div>
-  );
+    </motion.article>
+  )
 }

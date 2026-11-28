@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../../lib/supabase.js'
 import { clientData } from '../../data/clientData.js'
 import { whatsappUrl } from '../../utils/whatsapp.js'
 import Button from '../common/Button.jsx'
@@ -17,10 +18,37 @@ export function validateEnquiry(v) {
 
 /** Enquiry form that composes a WhatsApp message. Nothing is stored or sent by this site. */
 export default function PropertyEnquiry({ defaultProperty = '' }) {
-  const [values, setValues] = useState({ name: '', phone: '', email: '', property: defaultProperty, message: '' })
+  const [values, setValues] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    property: defaultProperty,
+    message: '',
+  })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle') // idle | opened | unavailable
-  const properties = clientData.properties
+  const [propertyOptions, setPropertyOptions] = useState(
+    () => clientData.properties.map((p) => ({ id: p.id, title: p.title }))
+  )
+
+  useEffect(() => {
+    let active = true
+    async function loadPropertyTitles() {
+      const { data } = await supabase
+        .from('properties')
+        .select('id, title')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+
+      if (active && data?.length) {
+        setPropertyOptions(data)
+      }
+    }
+    loadPropertyTitles()
+    return () => {
+      active = false
+    }
+  }, [])
 
   const set = (k) => (e) => setValues((v) => ({ ...v, [k]: e.target.value }))
 
@@ -46,29 +74,70 @@ export default function PropertyEnquiry({ defaultProperty = '' }) {
   const field = (id, label, props = {}, Tag = 'input') => (
     <div className="field">
       <label htmlFor={id}>{label}</label>
-      <Tag id={id} value={values[id]} onChange={set(id)} aria-invalid={Boolean(errors[id])} aria-describedby={errors[id] ? `${id}-err` : undefined} {...props} />
-      {errors[id] && <p className="error" id={`${id}-err`}>{errors[id]}</p>}
+      <Tag
+        id={id}
+        value={values[id]}
+        onChange={set(id)}
+        aria-invalid={Boolean(errors[id])}
+        aria-describedby={errors[id] ? `${id}-err` : undefined}
+        {...props}
+      />
+      {errors[id] && (
+        <p className="error" id={`${id}-err`}>
+          {errors[id]}
+        </p>
+      )}
     </div>
   )
 
   return (
     <form className="enquiry-form" onSubmit={submit} noValidate>
-      {field('name', 'Your name *', { autoComplete: 'name', required: true })}
-      {field('phone', 'Phone number *', { type: 'tel', autoComplete: 'tel', required: true })}
-      {field('email', 'Email (optional)', { type: 'email', autoComplete: 'email' })}
-      <div className="field">
-        <label htmlFor="property">Interested property (optional)</label>
-        <select id="property" value={values.property} onChange={set('property')}>
-          <option value="">No specific property</option>
-          {properties.map((p) => <option key={p.id} value={p.title}>{p.title}</option>)}
-        </select>
+      <div className="enquiry-form-header">
+        <h3>Request a private viewing</h3>
+        <p className="muted small" style={{ margin: 0 }}>
+          Share your preferences and continue directly in WhatsApp.
+        </p>
       </div>
-      {field('message', 'Message *', { rows: 4, required: true }, 'textarea')}
-      <p className="muted small">Submitting opens WhatsApp with your details pre-filled. Your enquiry is only sent once you press Send in WhatsApp. This website does not store enquiries.</p>
+
+      <div className="enquiry-form-row">
+        {field('name', 'Your name *', { autoComplete: 'name', required: true, placeholder: 'Full name' })}
+        {field('phone', 'Phone number *', { type: 'tel', autoComplete: 'tel', required: true, placeholder: '+91 ...' })}
+      </div>
+
+      <div className="enquiry-form-row">
+        {field('email', 'Email (optional)', { type: 'email', autoComplete: 'email', placeholder: 'name@example.com' })}
+        <div className="field">
+          <label htmlFor="property">Property of interest</label>
+          <select id="property" value={values.property} onChange={set('property')}>
+            <option value="">General enquiry</option>
+            {propertyOptions.map((p) => (
+              <option key={p.id} value={p.title}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {field('message', 'Message *', { rows: 4, required: true, placeholder: 'Preferred locality, configuration, or viewing dates...' }, 'textarea')}
+
+      <p className="muted small" style={{ margin: 0 }}>
+        Submitting opens WhatsApp with your details pre-filled. Your enquiry is only sent once you press Send in WhatsApp.
+      </p>
+
       <Button type="submit">Continue in WhatsApp</Button>
+
       <div aria-live="polite">
-        {status === 'opened' && <p className="notice">WhatsApp should have opened in a new tab. Nothing has been sent yet. Please send the pre-filled message there.</p>}
-        {status === 'unavailable' && <p className="notice notice-error">WhatsApp is not configured for this business. Please call instead.</p>}
+        {status === 'opened' && (
+          <p className="notice">
+            WhatsApp should have opened in a new tab. Nothing has been sent yet — please send the pre-filled message there.
+          </p>
+        )}
+        {status === 'unavailable' && (
+          <p className="notice notice-error">
+            WhatsApp is not configured for this business. Please call instead.
+          </p>
+        )}
       </div>
     </form>
   )

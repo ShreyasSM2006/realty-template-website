@@ -37,21 +37,23 @@ export const clientData = {
     openingHours: 'Mon–Sat, 10:00 – 19:00',
   },
 
-    branding: {
-    primaryColor: '#1a1446',
-    accentColor: '#ff5a5f',
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    fontFamily: "'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif",
-    layoutVariant: 'default',
+  branding: {
+    primaryColor: '#1C1B19',
+    accentColor: '#9E7B4F',
+    backgroundColor: '#F6F3EC',
+    textColor: '#242320',
+    fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
+    serifFamily: "'Cormorant Garamond', Georgia, 'Times New Roman', serif",
+    layoutVariant: 'editorial',
   },
 
   hero: {
     eyebrow: 'Thane · Mumbai Metropolitan Region',
-    title: 'YOUR GATEWAY TO ELEVATED LIVING',
+    title: 'Your Gateway to Elevated Living',
     description:
       "Find your ideal property in Thane with expert guidance for buying, selling, and renting. Tell us what you're looking for, and we'll help you discover the right property to match your needs and budget.",
-    backgroundImage: 'https://i.redd.it/6mi0g213xpih1.png',
+    backgroundImage:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85',
     primaryCtaText: 'Explore Properties',
     secondaryCtaText: 'WhatsApp Us',
   },

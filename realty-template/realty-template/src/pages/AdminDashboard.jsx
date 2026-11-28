@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
+import { useMeta } from "../utils/useMeta.js";
 import "./AdminDashboard.css";
 
 const emptyProperty = {
@@ -26,6 +28,7 @@ const formatPrice = (price, listingType) =>
   }`;
 
 export default function AdminDashboard() {
+  useMeta({ title: "Admin", path: "/admin" });
   const [session, setSession] = useState(null);
   const [checking, setChecking] = useState(true);
   const [authorized, setAuthorized] = useState(false);
@@ -524,15 +527,15 @@ export default function AdminDashboard() {
 
   if (checking) {
     return (
-      <main className="admin-shell">
+      <div className="admin-shell">
         <p>Checking admin access…</p>
-      </main>
+      </div>
     );
   }
 
   if (isRecovery) {
     return (
-      <main className="admin-login-page">
+      <div className="admin-login-page">
         <form className="admin-login-card" onSubmit={updatePassword}>
           <p className="admin-eyebrow">PROPERTY MANAGEMENT</p>
           <h1>Set new password</h1>
@@ -568,13 +571,13 @@ export default function AdminDashboard() {
             {loading ? "Updating password…" : "Update password"}
           </button>
         </form>
-      </main>
+      </div>
     );
   }
 
   if (!session || !authorized) {
     return (
-      <main className="admin-login-page">
+      <div className="admin-login-page">
         <form
           className="admin-login-card"
           onSubmit={forgotPassword ? sendPasswordReset : login}
@@ -665,13 +668,17 @@ export default function AdminDashboard() {
               </button>
             </>
           )}
+
+          <Link to="/" className="admin-back-site">
+            ← Return to public website
+          </Link>
         </form>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="admin-shell">
+    <div className="admin-shell">
       <header className="admin-header">
         <div>
           <p className="admin-eyebrow">PROPERTY MANAGEMENT</p>
@@ -679,9 +686,14 @@ export default function AdminDashboard() {
           <p>Manage the properties displayed on your website.</p>
         </div>
 
-        <button className="admin-secondary" onClick={logout}>
-          Sign out
-        </button>
+        <div className="admin-header-actions">
+          <Link to="/" className="admin-secondary admin-link-btn">
+            View website
+          </Link>
+          <button className="admin-secondary" onClick={logout}>
+            Sign out
+          </button>
+        </div>
       </header>
 
       {error && <div className="admin-alert error">{error}</div>}
@@ -1071,6 +1083,6 @@ export default function AdminDashboard() {
           </table>
         </div>
       </section>
-    </main>
+    </div>
   );
 }

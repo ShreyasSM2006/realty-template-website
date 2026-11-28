@@ -11,6 +11,7 @@ export function applyTheme(branding = clientData.branding) {
   if (HEX.test(branding.backgroundColor)) set('--color-bg', branding.backgroundColor)
   if (HEX.test(branding.textColor)) set('--color-text', branding.textColor)
   set('--font-sans', branding.fontFamily)
+  if (branding.serifFamily) set('--font-serif', branding.serifFamily)
 }
 
 export function applyFavicon(href) {

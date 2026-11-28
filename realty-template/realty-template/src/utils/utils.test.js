@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { normalizePhone, whatsappUrl, propertyEnquiryMessage } from './whatsapp.js'
 import { formatPrice } from './formatPrice.js'
 import { filterProperties, defaultFilters, sortProperties } from './propertyFilters.js'
+import { mapSupabaseProperty } from './propertyMapper.js'
 import { clientData } from '../data/clientData.js'
 
 test('normalizePhone', () => {
@@ -35,4 +36,25 @@ test('filters combine', () => {
 test('sort by price', () => {
   const s = sortProperties(clientData.properties, 'price-asc')
   assert.equal(s[0].price, 32000)
+})
+test('mapSupabaseProperty normalizes buy to sale and preserves fields', () => {
+  const mapped = mapSupabaseProperty({
+    id: 'abc',
+    title: 'Test Villa',
+    listing_type: 'buy',
+    property_type: 'Villa',
+    area_sqft: 2400,
+    locality: 'Thane West',
+    city: 'Thane',
+    image_urls: ['https://example.com/a.jpg'],
+    amenities: ['Garden'],
+    status: 'published',
+    created_at: '2026-10-01T00:00:00Z',
+  })
+  assert.equal(mapped.listingPurpose, 'sale')
+  assert.equal(mapped.propertyType, 'Villa')
+  assert.equal(mapped.areaSqFt, 2400)
+  assert.equal(mapped.status, 'available')
+  assert.equal(mapped.address, 'Thane West, Thane')
+  assert.equal(mapped.createdAt, '2026-10-01T00:00:00Z')
 })
